@@ -10,12 +10,12 @@ npx prisma generate
 npm run start:dev
 ```
 
-Environment variables:
+Environment variables (copy `.env.example` to `.env` and adjust):
 
-- `DATABASE_URL` – PostgreSQL connection string
+- `DATABASE_URL` – PostgreSQL connection string. You can point it at any managed PostgreSQL service by updating the host/port in the URI, e.g. `postgresql://user:pass@pgsql1.calserver.eu:5432/histhack?schema=public`.
 - `JWT_SECRET` – secret used to sign JWT tokens
 - `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_S3_BUCKET` – storage credentials
-- `AWS_S3_ENDPOINT` – optional custom S3 endpoint (e.g. MinIO)
+- `AWS_S3_ENDPOINT` – optional custom S3 endpoint (e.g. MinIO or other S3-compatible providers)
 - `AWS_S3_PUBLIC_URL_BASE` – optional public base URL for generated asset links
 - `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` – BullMQ connection
 
