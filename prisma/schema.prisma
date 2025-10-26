@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String
+  displayName    String
+  avatarUrl      String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  videos         Video[]
+  likes          Like[]
+  reports        Report[]
+  views          View[]
+  role           UserRole  @default(USER)
+  moderationLogs Report[]  @relation("ModeratorReports")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+model Video {
+  id              String     @id @default(uuid())
+  title           String
+  description     String     @db.Text
+  status          VideoStatus @default(PENDING)
+  sourceUrl       String     @db.Text
+  transcodedUrl   String?    @db.Text
+  thumbnailUrl    String?    @db.Text
+  duration        Int?
+  publishedAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  author          User       @relation(fields: [authorId], references: [id])
+  authorId        String
+  tags            VideoTag[]
+  views           View[]
+  likes           Like[]
+  reports         Report[]
+}
+
+enum VideoStatus {
+  PENDING
+  PROCESSING
+  READY
+  REJECTED
+}
+
+model Tag {
+  id    String    @id @default(uuid())
+  name  String    @unique
+  videos VideoTag[]
+}
+
+model VideoTag {
+  video   Video @relation(fields: [videoId], references: [id])
+  videoId String
+  tag     Tag   @relation(fields: [tagId], references: [id])
+  tagId   String
+
+  @@id([videoId, tagId])
+}
+
+model View {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  viewer    User?    @relation(fields: [viewerId], references: [id])
+  viewerId  String?
+  video     Video    @relation(fields: [videoId], references: [id])
+  videoId   String
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  video     Video    @relation(fields: [videoId], references: [id])
+  videoId   String
+
+  @@unique([userId, videoId])
+}
+
+model Report {
+  id          String        @id @default(uuid())
+  reason      String        @db.Text
+  status      ReportStatus  @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  reporter    User          @relation(fields: [reporterId], references: [id])
+  reporterId  String
+  video       Video         @relation(fields: [videoId], references: [id])
+  videoId     String
+  moderator   User?         @relation("ModeratorReports", fields: [moderatorId], references: [id])
+  moderatorId String?
+  verdict     String?       @db.Text
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
